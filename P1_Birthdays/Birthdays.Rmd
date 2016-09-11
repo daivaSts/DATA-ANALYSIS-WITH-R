@@ -1,0 +1,105 @@
+---
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+### Udacity / Data Analysis With R
+### PS1:  Exploring Your Friends' Birthdays
+****
+### Assignment
+The task is to investigate the distribution of my friends' birth months and days and answer questions:
+
+1. How many people share your birthday?
+
+2. Which month contains the most number of birthdays?
+
+3. How many birthdays are in each month?
+
+4. Which day of the year has the most number of birthdays?
+
+5. Do you have at least 365 friends that have birthdays on every day of the year?
+
+### About Dataset
+Working with a list of birthdays in provided birthdays example file. 
+***
+### Overview of the Data
+Loading libraries:
+```{r}
+library(ggplot2)
+library(lubridate)
+```
+***
+Loading the data file:
+```{r}
+dt <- read.csv('birthdaysExample.csv')
+```
+***
+Quick view of the statistics:
+```{r}
+dim(dt)
+str(dt$dates)
+head(dt)
+names(dt)
+```
+***
+Importing Dates from Character Format:
+```{r}
+betterDates <- as.Date(dt$dates, format = "%m/%d/%y")
+head(betterDates)
+```
+***
+Statistics of the formatted data:
+```{r}
+mean_date <- mean(betterDates)
+max_date <- max(betterDates)
+min_date <- min(betterDates)
+mean_date
+max_date
+min_date
+typeof(betterDates)
+```
+***
+#### 1. How many people share your birthday?
+```{r}
+bd_shared <- dt[betterDates == "2014-12-07",]
+bd_shared
+length(bd_shared)
+```
+***
+#### 2. Which month contains the most number of birthdays?
+```{r}
+bd_months <- months(betterDates)
+max(table(bd_months))
+bd_month_df <- as.data.frame(table(bd_months))
+max_month_row = bd_month_df$Freq == max(bd_month_df$Freq)
+bd_month_df[max_month_row,]
+```
+***
+#### 3. How many birthdays are in each month?
+```{r}
+table(bd_months)
+```
+***
+#### 4. Which day of the year has the most number of birthdays?
+```{r}
+bd_days <- day(betterDates)
+bd_df <- as.data.frame(table(bd_days))
+max_day_row = bd_df$Freq == max(bd_df$Freq)
+bd_df[max_day_row,]
+```
+***
+#### 5. Do you have at least 365 friends that have birthdays on every day of the year?
+```{r}
+dim(unique(dt[1]))[1] >= 365
+```
+***
+### Resources
+https://www.r-bloggers.com/date-formats-in-r/
+
+https://www.gcal2excel.com/
+
+https://support.google.com/calendar/answer/37111?hl=en
+
+https://cran.r-project.org/web/packages/lubridate/lubridate.pdf
