@@ -1,0 +1,138 @@
+---
+output: html_document
+---
+### Udacity/ Data Analysis With R
+### PS2:  Explore Two Variable
+
+### Assignment
+
+The Gapminder website contains over 500 data sets with information about
+the world's population. Your task is to continue the investigation you did at the end of Problem Set 3 or you can start fresh and choose a different data set from Gapminder.
+In your investigation, examine pairs of variable and create 2-5 plots that make use of the techniques from Lesson 4.
+
+### About Dataset
+
+Definition and explanations:
+8. Gapminder Data: https://www.gapminder.org/
+
+1. Indicator #1 Name: Indicator age of marriage.
+    a. Definition of the indicator: Mean age at 1st marriage of women: The average age, in years, of first marriage for women. Women who never married are excluded. Cohabitation is excluded. The data are based on multple sources and definitions might vary.
+    b. Source organization(s):	Gapminder has compiled the data you see in this graph from several sources, such as          official international statistics, various historical sources and our own estimates. 
+    c. Dataset consists data of year 2005.
+
+1. Indicator #2 Name: Indicator total fertility.
+      a. Definition of the indicator: Children per woman (total fertility): The number of children that would be born to each woman with prevailing age-specific fertility rates.
+      b. Source organization(s):	The data was compiled by Gapminder, using a variety of sources: (1) UN data (most observations after 1950), (2) Figures from historical demography, these are based on actual figures of total         fertility rates, (3) Estimates based on Crude Birth Rates or Princeton "If", (4) Rough estimates based on           extrapolations in time, extrapolations from local samples, regional averages etc.
+      c. Dataset consists data of year 2005.    
+
+### Overview of the Data
+Using the mean age at 1st marriage of women Gapminder data set, some exploratory graphics were built to understand if it has any correlation to the number of children that would be born to each woman. 
+
+Loading libraries:
+```{r}
+library(gridExtra)
+library(ggplot2)
+```
+
+Loading csv data file:
+```{r}
+setwd('/Users/daivasatas/Documents/DAND/P4/P2_Gapminder_2')
+dt1 <- read.csv('indicator_age_of_marriage.csv', header = T,  check.names = F)
+dt2 <- read.csv('indicator_temporary_total_fertility.csv', header = T,  check.names = F)
+```
+
+### Cleaning and Re-shaping Data
+Quick view of the statistics:
+```{r}
+dim(dt1)
+dim(dt2)
+```
+
+Creating data subset: I will be using data of the year 2005.
+```{r}
+dt1_col_2005 <- which( colnames(dt1) =="2005" )
+dt1.df <- dt1[, c(1, dt1_col_2005)]
+
+dt2_col_2005 <- which( colnames(dt2) =="2005" )
+dt2.df <- dt2[, c(1, dt2_col_2005)]
+```
+
+Handling missing/incomplete data.
+```{r}
+dt1.df <- na.omit(dt1.df)
+dt2.df <- na.omit(dt2.df)
+```
+
+Changing the first column name for both datasets.
+```{r}
+names(dt1.df)[1] <- c("Country")
+names(dt2.df)[1] <- c("Country")
+
+head(dt1.df)
+head(dt2.df)
+```
+
+Merging the data frames - taking the intersection of data.
+```{r}
+dtm <- merge(dt1.df, dt2.df, by="Country")
+```
+
+Checking how many countries did not have the equivalent and are left after the merging.
+```{r}
+setdiff(dt1.df$Country, dt2.df$Country)
+```
+
+Changing column names for clarity.
+```{r}
+names(dtm)[2] <- c("Age")
+names(dtm)[3] <- c("Children")
+head(dtm)
+```
+
+Statistics of the merged data frame.
+```{r}
+summary(dtm)
+```
+
+### Data Exploration
+Creating a scatterplot of mean age at 1st marriage versus the number of children that would be born to each woman.
+```{r ggplot Syntax}
+ggplot(aes(x=dtm$Age, y=dtm$Children), data = dtm)+
+  geom_point(color = 'red',shape = 1)+
+  xlab('Mean age at 1st marriage')+
+  ylab('Number of children that would be born')
+```
+
+Adjusting the transparency of the points and add a linear model to the plot.
+```{r}
+ggplot(aes(x=dtm$Age, y=dtm$Children), data = dtm)+
+  geom_point(alpha = 1/2, color= 'blue')+
+  xlab('Mean age at 1st marriage')+
+  ylab('Number of children that would be born')+
+  geom_smooth(method = 'lm', color = 'red')
+```
+
+
+Use scale_x_continuous() with the breaks parameter to adjust the x-axis: mark the x-axis every 2 units.
+```{r}
+range(dtm$Age)
+ggplot(aes(x=dtm$Age, y=dtm$Children), data = dtm)+
+  geom_point(color = 'purple', size = 2)+
+  xlab('Mean age at 1st marriage')+
+  ylab('Number of children that would be born')+
+  scale_x_continuous(breaks = seq(17,34,2))
+```
+
+Calculating the Pearson correlation.
+```{r}
+cor <- cor.test(dtm$Age, dtm$Children, method = c("pearson"))
+cor 
+```
+
+
+## Resources
+https://www.r-bloggers.com/quartiles-deciles-and-percentiles/
+
+http://www.statstutor.ac.uk/resources/uploaded/pearsons.pdf
+
+https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf
